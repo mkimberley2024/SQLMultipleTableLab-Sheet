@@ -1,0 +1,343 @@
+1.
+
+sqlite> SELECT EmployeeName
+FROM Employee
+WHERE DepartmentName = 'Marketing';
+Ned
+Andrew
+Clare
+
+
+2.
+
+sqlite> SELECT DISTINCT ItemName
+FROM Sale, Department
+WHERE Sale.DepartmentName =
+Department.DepartmentName AND
+Department.DepartmentFloor = 2;
+Boots-snakeproof
+Pith Helmet
+Hat-Polar Explorer
+Pocket knife-Nile
+Sextant
+Elephant polo stick
+Camel Saddle
+
+
+sqlite> SELECT DISTINCT ItemName
+FROM (Sale NATURAL JOIN Department)
+WHERE Department.DepartmentFloor = 2;
+Boots-snakeproof
+Pith Helmet
+Hat-Polar Explorer
+Pocket knife-Nile
+Sextant
+Elephant polo stick
+Camel Saddle
+
+sqlite> SELECT DISTINCT ItemName
+FROM (Sale JOIN Department)
+WHERE Department.DepartmentFloor = 2;
+Boots-snakeproof
+Pith Helmet
+Sextant
+Hat-Polar Explorer
+Pocket knife-Nile
+Compass
+Geo positioning system
+Map measure
+Exploring in 10 Easy Lessons
+How to Win Foreign Friends
+Elephant polo stick
+Camel Saddle
+
+- A natural join, joins tables based on columns with the same name
+- it only inlucdes results where the matching columns have identical values
+
+3.
+
+sqlite> SELECT DISTINCT ItemName,
+Department.DepartmentFloor AS 'On
+Floor'
+FROM Delivery, Department
+WHERE Delivery.DepartmentName = Department.DepartmentName
+AND
+Department.DepartmentFloor <> 2
+ORDER BY Department.DepartmentFloor, ItemName;
+Compass	1
+Exploring in 10 Easy Lessons	1
+Geo positioning system	1
+How to Win Foreign Friends	1
+Map case	1
+Map measure	1
+Pith Helmet	1
+Pocket knife-Nile	1
+Sextant	1
+Boots-snakeproof	3
+Compass	3
+Pith Helmet	3
+Pocket knife-Nile	3
+Sextant	3
+Pith Helmet	4
+Pocket knife-Nile	4
+
+4. sqlite> SELECT AVG(EmployeeSalary)
+FROM Employee
+WHERE DepartmentName = 'Clothes';
+16000.0
+
+5.
+
+sqlite> SELECT DepartmentName, AVG(EmployeeSalary) AS 'Average
+Salary'
+FROM Employee
+GROUP BY DepartmentName
+ORDER BY 'Average Salary' DESC;
+Recreation	15000.0
+Purchasing	49500.0
+Personnel	35000.0
+Navigation	15000.0
+Marketing	30666.6666666667
+Management	75000.0
+Furniture	15000.0
+Equipment	13000.0
+Clothes	16000.0
+Books	15000.0
+Accounting	30000.0
+
+6.
+
+sqlite> SELECT ItemName
+FROM Delivery
+GROUP BY ItemName HAVING COUNT(DISTINCT SupplierNumber) =
+1;
+Boots-snakeproof
+Exploring in 10 Easy Lessons
+Hat-Polar Explorer
+How to Win Foreign Friends
+Pocket knife-Avon
+Stetson
+Tent - 2 person
+Tent - 8 person
+
+
+7.
+
+sqlite> SELECT Supplier.SupplierNumber, Supplier.SupplierName                                                 
+FROM Delivery, Supplier
+WHERE                                                    
+Delivery.SupplierNumber
+=
+Supplier.SupplierNumber
+GROUP
+BY
+Supplier.SupplierNumber,
+Supplier.SupplierName
+HAVING               
+COUNT(DISTINCT
+Delivery.ItemName)
+>= 10;
+102	Nepalese Corp.
+
+8.
+
+sqlite> SELECT Boss.EmployeeNumber,
+Boss.EmployeeName, COUNT(*) AS
+'Employees'
+FROM Employee AS Worker, Employee AS Boss
+WHERE Worker.BossNumber = Boss.EmployeeNumber
+GROUP BY Boss.EmployeeNumber, Boss.EmployeeName;
+1	Alice	4
+2	Ned	2
+3	Andrew	5
+4	Clare	3
+5	Todd	1
+7	Brier	1
+
+9.
+
+sqlite> SELECT Department.DepartmentName,
+AVG(EmployeeSalary) AS 'Average Salary'
+FROM Employee, Department, Sale, Item
+WHERE Employee.DepartmentName =
+Department.DepartmentName AND
+Department.DepartmentName =
+Sale.DepartmentName AND Sale.ItemName =
+Item.ItemName
+AND ItemType = 'E'
+GROUP BY Department.DepartmentName;
+Books	15000.0
+Clothes	16000.0
+Equipment	13000.0
+Furniture	15000.0
+Navigation	15000.0
+Recreation	15000.0
+
+10.
+
+sqlite> SELECT SUM(SaleQuantity) AS 'Number of Items'
+FROM Department, Sale, Item
+WHERE Department.DepartmentName =
+Sale.DepartmentName AND
+Sale.ItemName = Item.ItemName
+AND ItemType = 'E' AND
+DepartmentFloor = '2';
+2
+
+Natural Join:
+
+SELECT SUM(SaleQuantity) AS 'Number of Items'
+FROM Department
+NATURAL JOIN Sale
+NATURAL JOIN Item
+WHERE ItemType = 'E'
+  AND DepartmentFloor = '2';
+
+11.
+
+sqlite> SELECT Delivery.SupplierNumber,
+SupplierName, Delivery.ItemName,
+AVG(Delivery.DeliveryQuantity) AS
+'Average Quantity'
+FROM ((Delivery NATURAL JOIN Supplier) NATURAL JOIN Item)
+WHERE Item.ItemType = 'N'
+GROUP BY Delivery.SupplierNumber,
+SupplierName, Delivery.ItemName ORDER BY
+Delivery.SupplierNumber, SupplierName,
+'Average Quantity' DESC,
+Delivery.ItemName;
+101	Global Maps and Books	Compass	50.0
+101	Global Maps and Books	Geo positioning system	10.0
+101	Global Maps and Books	Map measure	10.0
+101	Global Maps and Books	Sextant	2.0
+102	Nepalese Corp.	Compass	3.0
+102	Nepalese Corp.	Geo positioning system	1.0
+102	Nepalese Corp.	Map measure	10.0
+102	Nepalese Corp.	Sextant	5.0
+103	All Sports Manufacturing	Compass	20.0
+103	All Sports Manufacturing	Geo positioning system	1.0
+103	All Sports Manufacturing	Map measure	15.0
+103	All Sports Manufacturing	Sextant	1.0
+104	Sweatshops Unlimited	Sextant	3.0
+105	All Points inc.	Compass	5.0
+105	All Points inc.	Sextant	1.0
+106	Sao Paulo Manufacturing	Sextant	1.0
+
+
+Nested Queries:
+
+1.
+
+sqlite> SELECT DISTINCT ItemName
+FROM Sale
+WHERE DepartmentName IN
+(SELECT DepartmentName
+FROM Department
+WHERE DepartmentFloor = 2);
+Boots-snakeproof
+Pith Helmet
+Hat-Polar Explorer
+Pocket knife-Nile
+Sextant
+Elephant polo stick
+Camel Saddle
+
+
+2.
+
+qlite> SELECT EmployeeName, EmployeeSalary
+FROM Employee
+WHERE EmployeeNumber =
+(SELECT BossNumber
+FROM Employee
+WHERE EmployeeName = 'Clare');
+Ned	45000
+
+
+3.
+
+sqlite> SELECT EmployeeName, EmployeeSalary
+FROM Employee
+WHERE EmployeeNumber IN
+(SELECT BossNumber
+FROM Employee
+GROUP BY BossNumber HAVING COUNT(*) > 2);
+Alice	75000
+Andrew	25000
+Clare	22000
+
+
+4.
+
+sqlite> SELECT EmployeeName, EmployeeSalary
+FROM Employee
+WHERE EmployeeSalary >
+(SELECT MAX(EmployeeSalary)
+FROM Employee
+WHERE DepartmentName = 'Marketing');
+Alice	75000
+Sarah	56000
+
+5.
+
+sqlite> SELECT DISTINCT DepartmentName
+FROM Sale
+WHERE ItemName = 'Stetsons' AND DepartmentName IN
+(SELECT DepartmentName
+FROM Employee
+GROUP BY DepartmentName HAVING
+SUM(EmployeeSalary) > 25000);
+sqlite> 
+
+6.
+
+sqlite> SELECT DISTINCT Delivery.SupplierNumber,
+Supplier.SupplierName FROM (Supplier
+NATURAL JOIN Delivery)
+WHERE (ItemName <> 'Compass' AND
+SupplierNumber IN (SELECT
+SupplierNumber
+FROM Delivery
+WHERE ItemName = 'Compass'));
+105|All Points inc.
+101|Global Maps and Books
+103|All Sports Manufacturing
+102|Nepalese Corp.
+
+7.
+
+sqlite> SELECT DISTINCT Delivery.SupplierNumber,
+Supplier.SupplierName FROM (Supplier
+NATURAL JOIN Delivery) WHERE
+SupplierNumber IN
+(SELECT SupplierNumber
+FROM Delivery
+WHERE ItemName = 'Compass')
+GROUP BY Delivery.SupplierNumber,
+Supplier.SupplierName
+   ...> HAVING COUNT (DISTINCT ItemName) > 3;
+101|Global Maps and Books
+102|Nepalese Corp.
+103|All Sports Manufacturing
+105|All Points inc.
+
+8.
+
+sqlite> SELECT DISTINCT DepartmentName
+FROM Delivery AS Delivery1
+WHERE NOT EXISTS
+(SELECT *
+FROM Delivery AS Delivery2
+WHERE Delivery2.DepartmentName =
+Delivery1.DepartmentName
+AND ItemName NOT IN
+(SELECT ItemName
+FROM Delivery AS Delivery3
+WHERE Delivery3.DepartmentName <>
+Delivery1.DepartmentName));
+Books
+Equipment
+Furniture
+
+
+
